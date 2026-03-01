@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>KRSP 창고 관리</title>
+<style>
+:root {
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --border: #e2e6ea;
+  --border2: #d0d5dd;
+  --accent: #1a56db;
+  --accent-light: #e8eefb;
+  --accent-dark: #1040b0;
+  --ok: #059669;
+  --ok-light: #d1fae5;
+  --ng: #dc2626;
+  --ng-light: #fee2e2;
+  --text: #111827;
+  --text2: #374151;
+  --muted: #6b7280;
+  --muted2: #9ca3af;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+  --tab-h: 68px;
+  --header-h: 60px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── SCREENS ── */
+.app { height: 100vh; display: flex; flex-direction: column; }
+
+.screen {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--tab-h) + 20px);
+}
+.screen.active { display: block; }
+
+/* ── HEADER ── */
+.page-header {
+  background: var(--surface);
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.page-header-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  flex: 1;
+}
+.page-header-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+.header-badge {
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 1px;
+  margin-right: 10px;
+}
+.header-action-btn {
+  background: var(--accent-light);
+  color: var(--accent);
+  border: none;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ── BOTTOM TAB BAR ── */
+.tab-bar {
+  height: var(--tab-h);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-shrink: 0;
+}
+.tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted2);
+  transition: color 0.15s;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.tab-btn.active { color: var(--accent); }
+.tab-icon { font-size: 22px; line-height: 1; }
+.tab-label { font-size: 10px; font-weight: 600; letter-spacing: 0.5px; }
+.tab-btn.active .tab-label { color: var(--accent); }
+
+/* ── CONTENT AREA ── */
+.content { padding: 16px; }
+
+/* ── SECTION ── */
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin: 20px 0 8px 4px;
+}
+.section-title:first-child { margin-top: 4px; }
+
+/* ── CARD ── */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+/* ── FIELD ROWS ── */
+.field-row {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  min-height: 56px;
+}
+.field-row:last-child { border-bottom: none; }
+.field-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text2);
+  width: 110px;
+  flex-shrink: 0;
+}
+.field-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  font-family: var(--font);
+  color: var(--text);
+  background: transparent;
+  text-align: right;
+  min-width: 0;
+}
+.field-input::placeholder { color: var(--muted2); }
+.field-select {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  font-family: var(--font);
+  color: var(--text);
+  background: transparent;
+  text-align: right;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  min-width: 0;
+}
+.field-select.placeholder { color: var(--muted2); }
+.field-select option { color: var(--text); background: #fff; }
+.field-chevron { color: var(--muted2); margin-left: 6px; font-size: 14px; flex-shrink: 0; }
+.field-edit-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0 4px 8px;
+  flex-shrink: 0;
+}
+
+/* ── STATUS TOGGLE ── */
+.status-row {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.status-label { font-size: 14px; font-weight: 600; color: var(--text2); flex: 1; }
+.status-toggle {
+  display: flex;
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+.status-btn {
+  padding: 7px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+  transition: all 0.15s;
+}
+.status-btn.ok.active { background: var(--ok); color: #fff; }
+.status-btn.ng.active { background: var(--ng); color: #fff; }
+
+/* ── PHOTO UPLOAD ── */
+.photo-row {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.photo-row:last-child { border-bottom: none; }
+.photo-row-label { font-size: 14px; font-weight: 600; color: var(--text2); margin-bottom: 10px; }
+.photo-upload-area {
+  position: relative;
+  border: 2px dashed var(--border2);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--bg);
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.photo-upload-area.has-photo { border-style: solid; border-color: var(--border); min-height: unset; }
+.photo-upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.photo-placeholder { display: flex; align-items: center; gap: 8px; padding: 14px; }
+.photo-placeholder-icon { font-size: 22px; }
+.photo-placeholder-text { font-size: 13px; color: var(--muted); font-weight: 500; }
+.photo-preview-img { width: 100%; max-height: 160px; object-fit: cover; display: block; }
+.photo-uploaded-badge {
+  position: absolute; top: 8px; right: 8px;
+  background: var(--ok); color: #fff;
+  font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 20px;
+}
+
+/* ── MEMO ── */
+.memo-row {
+  padding: 14px 16px;
+}
+.memo-row-label { font-size: 14px; font-weight: 600; color: var(--text2); margin-bottom: 8px; }
+.memo-textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-size: 14px;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--bg);
+  resize: none;
+  outline: none;
+  min-height: 80px;
+  line-height: 1.5;
+}
+.memo-textarea:focus { border-color: var(--accent); }
+
+/* ── SAVE BUTTON ── */
+.save-bar {
+  padding: 12px 16px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+.save-btn-main {
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 16px;
+  border-radius: var(--radius);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.save-btn-main:active { transform: scale(0.98); background: var(--accent-dark); }
+
+/* ── LIST SCREEN ── */
+.list-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 16px;
+}
+.stat-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 14px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.stat-card-num { font-size: 26px; font-weight: 800; color: var(--text); }
+.stat-card-num.ok { color: var(--ok); }
+.stat-card-num.ng { color: var(--ng); }
+.stat-card-label { font-size: 10px; font-weight: 600; color: var(--muted); margin-top: 2px; letter-spacing: 1px; }
+
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px 20px; text-align: center; color: var(--muted);
+}
+.empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; color: var(--text2); }
+.empty-sub { font-size: 13px; color: var(--muted); }
+
+.record-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin: 0 16px 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+  position: relative;
+}
+.record-card:active { box-shadow: var(--shadow-md); }
+.record-card-accent { height: 4px; }
+.record-card-accent.ok { background: var(--ok); }
+.record-card-accent.ng { background: var(--ng); }
+.record-card-body { padding: 14px 16px; }
+.record-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.record-load { font-size: 16px; font-weight: 700; color: var(--text); }
+.record-date { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.record-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.rtag {
+  font-size: 11px; font-weight: 600; padding: 3px 9px;
+  border-radius: 20px; letter-spacing: 0.3px;
+}
+.rtag-blue { background: var(--accent-light); color: var(--accent); }
+.rtag-gray { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+.rtag-ok { background: var(--ok-light); color: var(--ok); }
+.rtag-ng { background: var(--ng-light); color: var(--ng); }
+.record-footer { display: flex; justify-content: space-between; align-items: center; }
+.record-inspector { font-size: 12px; color: var(--muted); }
+.record-time { font-size: 11px; color: var(--muted2); }
+
+/* select mode */
+.record-card.select-mode { padding-left: 0; }
+.record-checkbox-wrap {
+  display: none; align-items: center; justify-content: center;
+  width: 52px; flex-shrink: 0;
+}
+.select-mode-on .record-checkbox-wrap { display: flex; }
+.select-mode-on .record-card { display: flex; align-items: center; }
+.select-mode-on .record-card-inner { flex: 1; min-width: 0; }
+.record-checkbox {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 2px solid var(--border2); background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.record-card.selected .record-checkbox { background: var(--ng); border-color: var(--ng); }
+.record-card.selected .record-checkbox::after { content: '✓'; color: #fff; font-size: 13px; font-weight: 900; }
+.record-card.selected { background: #fff5f5; }
+
+.delete-trigger-btn {
+  margin: 4px 16px 16px;
+  width: calc(100% - 32px);
+  padding: 14px;
+  background: transparent;
+  border: 1.5px solid var(--ng);
+  color: var(--ng);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* select bar */
+.select-bar {
+  display: none;
+  position: fixed;
+  bottom: var(--tab-h);
+  left: 0; right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  gap: 10px;
+  z-index: 80;
+}
+.select-bar.visible { display: flex; }
+.sel-cancel { flex: 1; padding: 14px; background: var(--bg); border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; color: var(--muted); cursor: pointer; }
+.sel-confirm { flex: 2; padding: 14px; background: var(--ng); border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 700; color: #fff; cursor: pointer; }
+.sel-confirm:disabled { opacity: 0.4; }
+
+/* ── MODAL SHEET ── */
+.sheet-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4); z-index: 200;
+  align-items: flex-end; justify-content: center;
+}
+.sheet-overlay.open { display: flex; }
+.sheet {
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  width: 100%; max-width: 600px;
+  max-height: 90vh; overflow-y: auto;
+  animation: sheetUp 0.28s cubic-bezier(.32,.72,0,1);
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+@keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.sheet-handle {
+  width: 36px; height: 4px; background: var(--border2);
+  border-radius: 2px; margin: 12px auto 0; 
+}
+.sheet-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.sheet-title { font-size: 16px; font-weight: 700; color: var(--text); }
+.sheet-close {
+  width: 32px; height: 32px; background: var(--bg); border: none;
+  border-radius: 50%; font-size: 16px; color: var(--muted);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+
+/* edit list sheet */
+.edit-list-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 20px; border-bottom: 1px solid var(--border);
+}
+.edit-list-item:last-child { border-bottom: none; }
+.edit-list-input {
+  flex: 1; border: none; outline: none; font-size: 16px;
+  font-family: var(--font); color: var(--text); background: transparent;
+}
+.edit-del-btn {
+  width: 32px; height: 32px; background: var(--ng-light); border: none;
+  border-radius: 50%; color: var(--ng); font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.edit-add-btn {
+  width: calc(100% - 32px); margin: 12px 16px; padding: 14px;
+  background: var(--accent-light); border: none; border-radius: var(--radius-sm);
+  font-size: 15px; font-weight: 600; color: var(--accent); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.sheet-save-btn {
+  width: calc(100% - 32px); margin: 8px 16px 16px; padding: 16px;
+  background: var(--accent); border: none; border-radius: var(--radius);
+  font-size: 16px; font-weight: 700; color: #fff; cursor: pointer;
+}
+
+/* detail sheet */
+.detail-kv { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; }
+.detail-kv:last-child { border-bottom: none; }
+.detail-k { font-size: 13px; font-weight: 600; color: var(--muted); width: 100px; flex-shrink: 0; }
+.detail-v { font-size: 15px; color: var(--text); font-weight: 500; flex: 1; text-align: right; word-break: break-all; }
+.detail-v.ok { color: var(--ok); font-weight: 700; }
+.detail-v.ng { color: var(--ng); font-weight: 700; }
+.detail-photo { width: 100%; display: block; }
+.detail-actions {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; padding: 16px 20px;
+}
+.detail-del { padding: 14px; background: var(--ng-light); border: none; color: var(--ng); font-size: 14px; font-weight: 700; border-radius: var(--radius-sm); cursor: pointer; }
+.detail-dl  { padding: 14px; background: var(--accent); border: none; color: #fff; font-size: 14px; font-weight: 700; border-radius: var(--radius-sm); cursor: pointer; }
+
+/* confirm sheet */
+.confirm-body { padding: 24px 20px 8px; text-align: center; }
+.confirm-emoji { font-size: 44px; margin-bottom: 12px; }
+.confirm-ttl { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+.confirm-desc { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+.confirm-cnt { color: var(--ng); font-weight: 800; }
+.confirm-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 20px 20px; }
+.confirm-no  { padding: 16px; background: var(--bg); border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; color: var(--text2); cursor: pointer; }
+.confirm-yes { padding: 16px; background: var(--ng); border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 700; color: #fff; cursor: pointer; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; top: 80px; left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: #1f2937; color: #fff;
+  padding: 12px 20px; border-radius: 100px;
+  font-size: 14px; font-weight: 600;
+  opacity: 0; transition: all 0.3s; z-index: 999;
+  white-space: nowrap; box-shadow: var(--shadow-md);
+  pointer-events: none;
+}
+.toast.ok-toast { background: var(--ok); }
+.toast.err-toast { background: var(--ng); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ══════════ FORM SCREEN ══════════ -->
+  <div class="screen active" id="screenForm">
+
+    <div class="page-header">
+      <span class="header-badge">KRSP</span>
+      <div>
+        <div class="page-header-title">입고 검수</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- INSPECTOR INFO -->
+      <div class="section-title">Inspector Info</div>
+      <div class="card">
+        <div class="field-row">
+          <div class="field-label">점검자</div>
+          <input class="field-input" type="text" id="inspector" placeholder="이름 입력">
+        </div>
+        <div class="field-row">
+          <div class="field-label">Item No.</div>
+          <input class="field-input" type="text" id="itemNumber" placeholder="아이템 번호">
+        </div>
+        <div class="field-row">
+          <div class="field-label">날짜</div>
+          <input class="field-input" type="date" id="date">
+        </div>
+      </div>
+
+      <!-- SHIPMENT INFO -->
+      <div class="section-title">Shipment Info</div>
+      <div class="card">
+        <div class="field-row">
+          <div class="field-label">Load No.</div>
+          <input class="field-input" type="text" id="loadNumber" placeholder="로드 번호">
+        </div>
+        <div class="field-row">
+          <div class="field-label">Supplier</div>
+          <select class="field-select" id="supplier" onchange="this.classList.toggle('placeholder', !this.value)">
+            <option value="">선택</option>
+          </select>
+          <span class="field-chevron">›</span>
+          <button class="field-edit-btn" onclick="openEditSheet('supplier')">편집</button>
+        </div>
+        <div class="field-row">
+          <div class="field-label">Defect Type</div>
+          <select class="field-select" id="defectType" onchange="onDefectChange(); this.classList.toggle('placeholder', !this.value)">
+            <option value="">선택</option>
+          </select>
+          <span class="field-chevron">›</span>
+          <button class="field-edit-btn" onclick="openEditSheet('defect')">편집</button>
+        </div>
+      </div>
+
+      <!-- ISSUE ITEM -->
+      <div class="section-title">Issue Item</div>
+      <div class="card">
+        <div class="status-row">
+          <div class="status-label">01 · Q'TY 상태</div>
+          <div class="status-toggle">
+            <button class="status-btn ok active" id="btn-ok" onclick="setStatus('OK')">OK</button>
+            <button class="status-btn ng" id="btn-ng" onclick="setStatus('NG')">NG</button>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-label">수량</div>
+          <input class="field-input" type="number" id="qty" placeholder="0">
+        </div>
+        <div class="field-row" style="border-bottom:1px solid var(--border)">
+          <div class="field-label">Location</div>
+          <input class="field-input" type="text" id="location" placeholder="창고 위치">
+        </div>
+        <div class="field-row">
+          <div class="field-label">조치 날짜</div>
+          <input class="field-input" type="date" id="actionDate">
+        </div>
+        <div class="photo-row">
+          <div class="photo-row-label">📷 사진</div>
+          <div class="photo-upload-area" id="photoArea">
+            <input type="file" accept="image/*" capture="environment" onchange="handlePhoto(event)">
+            <div class="photo-placeholder">
+              <span class="photo-placeholder-icon">📷</span>
+              <span class="photo-placeholder-text">터치하여 사진 촬영 / 업로드</span>
+            </div>
+            <img class="photo-preview-img" id="photoPreview" style="display:none">
+            <div class="photo-uploaded-badge" id="photoBadge" style="display:none">✓ 등록됨</div>
+          </div>
+        </div>
+        <div class="memo-row">
+          <div class="memo-row-label">메모</div>
+          <textarea class="memo-textarea" id="memo" placeholder="메모를 입력하세요..."></textarea>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+
+    <div class="save-bar">
+      <button class="save-btn-main" onclick="saveRecord()">
+        <span>💾</span> SAVE
+      </button>
+    </div>
+
+  </div><!-- /screenForm -->
+
+  <!-- ══════════ LIST SCREEN ══════════ -->
+  <div class="screen" id="screenList">
+
+    <div class="page-header">
+      <div>
+        <div class="page-header-title">저장 기록</div>
+        <div class="page-header-sub" id="listSubTitle">총 0건</div>
+      </div>
+    </div>
+
+    <div class="list-stats" id="listStats"></div>
+    <div id="listBody"></div>
+
+    <!-- select bar -->
+    <div class="select-bar" id="selectBar">
+      <button class="sel-cancel" onclick="exitSelectMode()">취소</button>
+      <button class="sel-confirm" id="selConfirmBtn" onclick="requestDelete()" disabled>삭제 (0)</button>
+    </div>
+
+  </div><!-- /screenList -->
+
+  <!-- ══════════ TAB BAR ══════════ -->
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-form" onclick="switchTab('form')">
+      <span class="tab-icon">📋</span>
+      <span class="tab-label">검수 입력</span>
+    </button>
+    <button class="tab-btn" id="tab-list" onclick="switchTab('list')">
+      <span class="tab-icon">📂</span>
+      <span class="tab-label">저장 목록</span>
+    </button>
+  </div>
+
+</div><!-- /app -->
+
+<!-- ── SUPPLIER EDIT SHEET ── -->
+<div class="sheet-overlay" id="supplierSheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">Supplier 편집</div>
+      <button class="sheet-close" onclick="closeSheet('supplierSheet')">✕</button>
+    </div>
+    <div id="supplierEditList"></div>
+    <button class="edit-add-btn" onclick="addEditItem('supplierEditList')">＋ 항목 추가</button>
+    <button class="sheet-save-btn" onclick="saveEditSheet('supplier')">저장</button>
+  </div>
+</div>
+
+<!-- ── DEFECT EDIT SHEET ── -->
+<div class="sheet-overlay" id="defectSheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">Defect Type 편집</div>
+      <button class="sheet-close" onclick="closeSheet('defectSheet')">✕</button>
+    </div>
+    <div id="defectEditList"></div>
+    <button class="edit-add-btn" onclick="addEditItem('defectEditList')">＋ 항목 추가</button>
+    <button class="sheet-save-btn" onclick="saveEditSheet('defect')">저장</button>
+  </div>
+</div>
+
+<!-- ── DETAIL SHEET ── -->
+<div class="sheet-overlay" id="detailSheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">상세 보기</div>
+      <button class="sheet-close" onclick="closeSheet('detailSheet')">✕</button>
+    </div>
+    <div id="detailBody"></div>
+    <div class="detail-actions">
+      <button class="detail-del" onclick="deleteFromDetail()">🗑 삭제</button>
+      <button class="detail-dl" onclick="downloadFromDetail()">⬇ TXT</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── CONFIRM SHEET ── -->
+<div class="sheet-overlay" id="confirmSheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="confirm-body">
+      <div class="confirm-emoji">🗑</div>
+      <div class="confirm-ttl">기록을 삭제할까요?</div>
+      <div class="confirm-desc" id="confirmDesc"></div>
+    </div>
+    <div class="confirm-btns">
+      <button class="confirm-no" onclick="closeSheet('confirmSheet')">취소</button>
+      <button class="confirm-yes" onclick="confirmDelete()">삭제</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let currentStatus = 'OK';
+let currentPhoto  = null;
+let currentDetailId = null;
+let selectMode    = false;
+let selectedIds   = new Set();
+
+// ── STORAGE
+const DEFAULTS = {
+  supplier: ['GB','FRANCE','PS AUTO','OCV','CHINA','BRAZIL'],
+  defect:   ['RD','FFR','Shortage','Over Supply','WDRY','기타']
+};
+function loadList(k) {
+  try { const r = localStorage.getItem('krsp_'+k); return r ? JSON.parse(r) : [...DEFAULTS[k]]; } catch { return [...DEFAULTS[k]]; }
+}
+function saveList(k, arr) { try { localStorage.setItem('krsp_'+k, JSON.stringify(arr)); } catch {} }
+function loadRecords() { try { const r = localStorage.getItem('krsp_records'); return r ? JSON.parse(r) : []; } catch { return []; } }
+function saveRecords(arr) { try { localStorage.setItem('krsp_records', JSON.stringify(arr)); } catch {} }
+
+let supplierList = loadList('supplier');
+let defectList   = loadList('defect');
+['WDRY','기타'].forEach(i => { if (!defectList.includes(i)) defectList.push(i); });
+saveList('defect', defectList);
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('date').value = today;
+  document.getElementById('actionDate').value = today;
+  renderSelect('supplier');
+  renderSelect('defect');
+
+  // supplier placeholder init
+  document.getElementById('supplier').classList.add('placeholder');
+  document.getElementById('defectType').classList.add('placeholder');
+});
+
+function renderSelect(key) {
+  const el  = document.getElementById(key === 'supplier' ? 'supplier' : 'defectType');
+  const arr = key === 'supplier' ? supplierList : defectList;
+  const prev = el.value;
+  el.innerHTML = `<option value="">선택</option>` +
+    arr.map(v => `<option value="${v}"${v===prev?' selected':''}>${v}</option>`).join('');
+  el.classList.toggle('placeholder', !el.value);
+}
+
+// ══════════════════════════════════════════
+// TAB SWITCH
+// ══════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'list') { exitSelectMode(); renderList(); }
+}
+
+// ══════════════════════════════════════════
+// FORM LOGIC
+// ══════════════════════════════════════════
+function setStatus(s) {
+  currentStatus = s;
+  document.getElementById('btn-ok').classList.toggle('active', s==='OK');
+  document.getElementById('btn-ng').classList.toggle('active', s==='NG');
+}
+
+function onDefectChange() {
+  const val = document.getElementById('defectType').value;
+  document.getElementById('location').value = val;
+}
+
+function handlePhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      const MAX = 1280;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else       { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      currentPhoto = canvas.toDataURL('image/jpeg', 0.7);
+      const preview = document.getElementById('photoPreview');
+      const area    = document.getElementById('photoArea');
+      const badge   = document.getElementById('photoBadge');
+      preview.src = currentPhoto;
+      preview.style.display = 'block';
+      badge.style.display = 'block';
+      area.classList.add('has-photo');
+      area.querySelector('.photo-placeholder').style.display = 'none';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveRecord() {
+  const inspector  = document.getElementById('inspector').value.trim();
+  const itemNumber = document.getElementById('itemNumber').value.trim();
+  const loadNumber = document.getElementById('loadNumber').value.trim();
+  const supplier   = document.getElementById('supplier').value;
+  const defectType = document.getElementById('defectType').value;
+
+  if (!inspector)  { showToast('점검자 이름을 입력하세요', 'err'); return; }
+  if (!loadNumber) { showToast('Load Number를 입력하세요', 'err'); return; }
+  if (!supplier)   { showToast('Supplier를 선택하세요', 'err'); return; }
+  if (!defectType) { showToast('Defect Type을 선택하세요', 'err'); return; }
+
+  const record = {
+    id:         Date.now().toString(),
+    savedAt:    new Date().toISOString(),
+    inspector, itemNumber,
+    date:       document.getElementById('date').value,
+    loadNumber, supplier, defectType,
+    item: {
+      status:     currentStatus,
+      qty:        document.getElementById('qty').value,
+      location:   document.getElementById('location').value,
+      actionDate: document.getElementById('actionDate').value,
+      memo:       document.getElementById('memo').value,
+      image:      currentPhoto
+    }
+  };
+
+  const records = loadRecords();
+  records.unshift(record);
+  saveRecords(records);
+  showToast('✓ 저장되었습니다', 'ok');
+  setTimeout(resetForm, 500);
+}
+
+function resetForm() {
+  document.getElementById('inspector').value  = '';
+  document.getElementById('itemNumber').value = '';
+  document.getElementById('loadNumber').value = '';
+  document.getElementById('supplier').value   = '';
+  document.getElementById('defectType').value = '';
+  document.getElementById('supplier').classList.add('placeholder');
+  document.getElementById('defectType').classList.add('placeholder');
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('date').value       = today;
+  document.getElementById('qty').value        = '';
+  document.getElementById('location').value   = '';
+  document.getElementById('actionDate').value = today;
+  document.getElementById('memo').value       = '';
+  currentPhoto  = null;
+  currentStatus = 'OK';
+  setStatus('OK');
+  const preview = document.getElementById('photoPreview');
+  const area    = document.getElementById('photoArea');
+  const badge   = document.getElementById('photoBadge');
+  preview.style.display = 'none'; preview.src = '';
+  badge.style.display   = 'none';
+  area.classList.remove('has-photo');
+  area.querySelector('.photo-placeholder').style.display = '';
+  document.getElementById('screenForm').scrollTo(0,0);
+}
+
+// ══════════════════════════════════════════
+// EDIT SHEETS
+// ══════════════════════════════════════════
+function openEditSheet(key) {
+  const arr    = key === 'supplier' ? supplierList : defectList;
+  const listId = key === 'supplier' ? 'supplierEditList' : 'defectEditList';
+  const listEl = document.getElementById(listId);
+  listEl.innerHTML = '';
+  arr.forEach(v => addEditItem(listId, v));
+  openSheet(key === 'supplier' ? 'supplierSheet' : 'defectSheet');
+}
+
+function addEditItem(listId, value='') {
+  const el = document.getElementById(listId);
+  const row = document.createElement('div');
+  row.className = 'edit-list-item';
+  row.innerHTML = `
+    <input class="edit-list-input" type="text" value="${value}" placeholder="항목 이름">
+    <button class="edit-del-btn" onclick="this.closest('.edit-list-item').remove()">✕</button>
+  `;
+  el.appendChild(row);
+  if (!value) row.querySelector('input').focus();
+}
+
+function saveEditSheet(key) {
+  const listId = key === 'supplier' ? 'supplierEditList' : 'defectEditList';
+  const arr = Array.from(document.getElementById(listId).querySelectorAll('input'))
+    .map(i => i.value.trim()).filter(v => v);
+  if (key === 'supplier') { supplierList = arr; saveList('supplier', arr); renderSelect('supplier'); }
+  else                    { defectList   = arr; saveList('defect',   arr); renderSelect('defect');   }
+  closeSheet(key === 'supplier' ? 'supplierSheet' : 'defectSheet');
+  showToast('저장되었습니다', 'ok');
+}
+
+// ══════════════════════════════════════════
+// LIST RENDER
+// ══════════════════════════════════════════
+function renderList() {
+  const records   = loadRecords();
+  const body      = document.getElementById('listBody');
+  const stats     = document.getElementById('listStats');
+  const subTitle  = document.getElementById('listSubTitle');
+
+  subTitle.textContent = `총 ${records.length}건`;
+
+  const okCnt = records.filter(r => r.item.status === 'OK').length;
+  const ngCnt = records.filter(r => r.item.status === 'NG').length;
+
+  stats.innerHTML = `
+    <div class="stat-card"><div class="stat-card-num">${records.length}</div><div class="stat-card-label">TOTAL</div></div>
+    <div class="stat-card"><div class="stat-card-num ok">${okCnt}</div><div class="stat-card-label">OK</div></div>
+    <div class="stat-card"><div class="stat-card-num ng">${ngCnt}</div><div class="stat-card-label">NG</div></div>
+  `;
+
+  if (records.length === 0) {
+    body.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <div class="empty-title">저장된 기록이 없습니다</div>
+        <div class="empty-sub">검수 입력 탭에서 데이터를 저장해보세요</div>
+      </div>`;
+    return;
+  }
+
+  body.innerHTML = records.map(r => {
+    const isNg  = r.item.status === 'NG';
+    const hasPhoto = !!r.item.image;
+    const t = new Date(r.savedAt).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+    return `
+      <div class="record-card ${isNg?'ng-item':'ok-item'}" id="rc-${r.id}" onclick="onCardClick('${r.id}')">
+        <div class="record-checkbox-wrap"><div class="record-checkbox" id="chk-${r.id}"></div></div>
+        <div class="record-card-inner">
+          <div class="record-card-accent ${isNg?'ng':'ok'}"></div>
+          <div class="record-card-body">
+            <div class="record-card-top">
+              <div>
+                <div class="record-load">${r.loadNumber || '-'}</div>
+                <div class="record-date">${r.date}</div>
+              </div>
+              <div style="text-align:right">
+                <div class="rtag ${isNg?'rtag-ng':'rtag-ok'}">${r.item.status}</div>
+              </div>
+            </div>
+            <div class="record-tags">
+              <span class="rtag rtag-blue">${r.supplier}</span>
+              <span class="rtag rtag-gray">${r.defectType}</span>
+              ${hasPhoto ? '<span class="rtag rtag-gray">📷</span>' : ''}
+              ${r.itemNumber ? `<span class="rtag rtag-gray">#${r.itemNumber}</span>` : ''}
+            </div>
+            <div class="record-footer">
+              <div class="record-inspector">👤 ${r.inspector}</div>
+              <div class="record-time">${t}</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  body.innerHTML += `<button class="delete-trigger-btn" onclick="enterSelectMode()">🗑 삭제</button>`;
+}
+
+// ══════════════════════════════════════════
+// SELECT MODE
+// ══════════════════════════════════════════
+function enterSelectMode() {
+  selectMode = true;
+  selectedIds = new Set();
+  document.getElementById('listBody').classList.add('select-mode-on');
+  document.getElementById('selectBar').classList.add('visible');
+  updateSelBtn();
+}
+
+function exitSelectMode() {
+  selectMode = false;
+  selectedIds = new Set();
+  document.getElementById('listBody').classList.remove('select-mode-on');
+  document.getElementById('selectBar').classList.remove('visible');
+  document.querySelectorAll('.record-card').forEach(c => c.classList.remove('selected'));
+}
+
+function onCardClick(id) {
+  if (!selectMode) { openDetail(id); return; }
+  const card = document.getElementById('rc-' + id);
+  if (selectedIds.has(id)) { selectedIds.delete(id); card.classList.remove('selected'); }
+  else                     { selectedIds.add(id);    card.classList.add('selected'); }
+  updateSelBtn();
+}
+
+function updateSelBtn() {
+  const n   = selectedIds.size;
+  const btn = document.getElementById('selConfirmBtn');
+  btn.textContent = `삭제 (${n})`;
+  btn.disabled    = n === 0;
+}
+
+function requestDelete() {
+  if (selectedIds.size === 0) return;
+  document.getElementById('confirmDesc').innerHTML =
+    `선택한 <span class="confirm-cnt">${selectedIds.size}개</span>의 기록이 영구 삭제됩니다.<br>이 작업은 되돌릴 수 없습니다.`;
+  openSheet('confirmSheet');
+}
+
+function confirmDelete() {
+  const remaining = loadRecords().filter(r => !selectedIds.has(r.id));
+  saveRecords(remaining);
+  closeSheet('confirmSheet');
+  exitSelectMode();
+  showToast(`✓ ${selectedIds.size}개 삭제 완료`, 'ok');
+  selectedIds = new Set();
+  renderList();
+}
+
+// ══════════════════════════════════════════
+// DETAIL
+// ══════════════════════════════════════════
+function openDetail(id) {
+  const r = loadRecords().find(r => r.id === id);
+  if (!r) return;
+  currentDetailId = id;
+  const item = r.item;
+  const sCls = item.status === 'OK' ? 'ok' : 'ng';
+
+  let html = `
+    <div class="detail-kv"><div class="detail-k">점검자</div><div class="detail-v">${r.inspector}</div></div>
+    ${r.itemNumber ? `<div class="detail-kv"><div class="detail-k">Item No.</div><div class="detail-v">${r.itemNumber}</div></div>` : ''}
+    <div class="detail-kv"><div class="detail-k">날짜</div><div class="detail-v">${r.date}</div></div>
+    <div class="detail-kv"><div class="detail-k">Load No.</div><div class="detail-v">${r.loadNumber}</div></div>
+    <div class="detail-kv"><div class="detail-k">Supplier</div><div class="detail-v">${r.supplier}</div></div>
+    <div class="detail-kv"><div class="detail-k">Defect Type</div><div class="detail-v">${r.defectType}</div></div>
+    <div class="detail-kv"><div class="detail-k">상태</div><div class="detail-v ${sCls}">${item.status}</div></div>
+    <div class="detail-kv"><div class="detail-k">수량</div><div class="detail-v">${item.qty || '-'}</div></div>
+    <div class="detail-kv"><div class="detail-k">Location</div><div class="detail-v">${item.location || '-'}</div></div>
+    <div class="detail-kv"><div class="detail-k">조치 날짜</div><div class="detail-v">${item.actionDate || '-'}</div></div>
+    <div class="detail-kv"><div class="detail-k">메모</div><div class="detail-v">${item.memo || '-'}</div></div>
+  `;
+  if (item.image) html += `<img class="detail-photo" src="${item.image}" alt="사진">`;
+
+  document.getElementById('detailBody').innerHTML = html;
+  openSheet('detailSheet');
+}
+
+function deleteFromDetail() {
+  if (!currentDetailId) return;
+  selectedIds = new Set([currentDetailId]);
+  closeSheet('detailSheet');
+  setTimeout(() => requestDelete(), 300);
+}
+
+function downloadFromDetail() {
+  if (!currentDetailId) return;
+  const r = loadRecords().find(r => r.id === currentDetailId);
+  if (!r) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([buildText(r)], {type:'text/plain;charset=utf-8'}));
+  a.download = `KRSP_${r.date}_${r.loadNumber}.txt`;
+  a.click();
+}
+
+// ══════════════════════════════════════════
+// SHEET HELPERS
+// ══════════════════════════════════════════
+function openSheet(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSheet(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// click outside to close
+document.querySelectorAll('.sheet-overlay').forEach(el => {
+  el.addEventListener('click', function(e) {
+    if (e.target === this) closeSheet(this.id);
+  });
+});
+
+// ══════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast${type==='ok'?' ok-toast':type==='err'?' err-toast':''} show`;
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ══════════════════════════════════════════
+// TEXT EXPORT
+// ══════════════════════════════════════════
+function buildText(r) {
+  const item = r.item;
+  return `KRSP 창고 관리 APP\n${'='.repeat(36)}\n점검자: ${r.inspector}\nItem No: ${r.itemNumber||'-'}\n날짜: ${r.date}\nLoad No: ${r.loadNumber}\nSupplier: ${r.supplier}\nDefect Type: ${r.defectType}\n${'='.repeat(36)}\n상태: ${item.status}\n수량: ${item.qty||'-'}\nLocation: ${item.location||'-'}\n조치날짜: ${item.actionDate||'-'}\n메모: ${item.memo||'-'}\n사진: ${item.image?'있음':'없음'}\n`;
+}
+</script>
+</body>
+</html>
